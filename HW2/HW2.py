@@ -119,7 +119,17 @@ class cPQueue:
                     return True;        
             #P_RR
             if self.sortNum == 3:
-                pass
+                #allow the process to be added to the end of the queue
+                pass       
+            
+            #Preemptive Priority
+            if self.sortNum == 4:
+                p = self._LQ[i]
+                #lower number means higher priority
+                if item.getPriority() < p.getPriority():
+                    self._LQ.insert(i, item)
+                    return True
+                #else, the item should get added to the end of the list (FCFS)
                 
             
                 
@@ -183,26 +193,49 @@ class cPQueue:
 
 #Entry Point
 
-cPQ = cPQueue(1)
+cPQ = cPQueue(3)
 
 print "This is a test of FCFS, Lower PID -> Earlier Process"
 
 for i in range(1, 11):                                                        #If CPU Bound
     cPQ.addItem(Process(random.randint(0, 1000), random.randint(0, 1000), 10, True))
 
-#round robin,
-#
-#
+def nonPreemptive():
+    while not cPQ.isEmpty():
+
+        #process is still running
+        if (not cPQ.peekTop().isDone()):
+            cPQ.peekTop().incrementRunTime()
+            cPQ.incWaitTimes()
+            cPQ.incTurnAroundTimes()
+        else:
+            p = cPQ.popTop()
+            print "PID:", p.getPID(), " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+
+#def preemptive():
+timeslice = 100
 while not cPQ.isEmpty():
-
-    #process is still running
-    if (not cPQ.peekTop().isDone()):
-        cPQ.peekTop().incrementRunTime()
-        cPQ.incWaitTimes()
-        cPQ.incTurnAroundTimes()
+    tDelta = 0
+    p = cPQ.popTop() #current process in the queue
+    while tDelta < timeslice:
+        tDelta += 1
+        
+        #check if the process is still running            
+        if(not p.isDone()):
+            p.incrementRunTime()
+            cPQ.incWaitTimes()
+            cPQ.incTurnAroundTimes()
+        else:                             
+            break
+        
+    
+    #if the process has not finished, re add it to the queue
+    if(not p.isDone()):
+        cPQ.addItem(p)
+        print "Preempted: PID:", p.getPID(), " Burst:", p.getBurst(), " RunTime:", p.getRunTime()
     else:
-        p = cPQ.popTop()
-        print "PID:", p.getPID(), " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
-
+        print "Finished: PID:", p.getPID(), " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+    
+                
 
 
