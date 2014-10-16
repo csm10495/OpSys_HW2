@@ -105,6 +105,10 @@ class cPQueue:
     def addItem(self, item):
         #go through each item in _List_Queue and add it
 
+        if(item.isCPUBound()):#print that an item has been added
+            print "CPU-bound process ",item.getPID()," entered the ready queue (requires ",item.getBurst(),"ms CPU time; priority", item.getPriority(),")"
+        else:
+            print " Interactive process ",item.getPID()," entered the ready queue (requires ",item.getBurst(),"ms CPU time; priority", item.getPriority(),")"
         #Special case for previously empty _LQ
         if len(self._LQ) == 0:
             self._LQ.append(item)
@@ -136,7 +140,7 @@ class cPQueue:
         #If all else fails, add to end of List
         self._LQ.append(item)
         return True
-
+            
     #Peeks the 0th value of _LQ
     #returns None on failure
     def peekTop(self):
@@ -207,7 +211,8 @@ def getProcessList(n):
             #CPU bound
             process_list.append(Process(random.randint(200, 3000), i, random.randint(0, 4), True, random.randint(1200, 3200)))
 
-    return random.shuffle(process_list)
+    random.shuffle(process_list)
+    return process_list
 
 a = getProcessList(14)
 
@@ -217,9 +222,8 @@ cPQ = cPQueue(1)
 print "This is a test of FCFS, Lower PID -> Earlier Process"
 
 time = 0
-for i in range(1, 11):                  #If CPU Bound
-    p = Process(random.randint(0, 1000), random.randint(0, 1000), 10, True)
-    cPQ.addItem(p)
+for i in a:
+    cPQ.addItem(i)
 
 while not cPQ.isEmpty():
 
