@@ -63,6 +63,14 @@ class Process:
     def getBurst(self):
         return self.burst
 
+    #increment priority by 1
+    def incPriority(self):
+        self.priority+=1
+        if(self.cpu_bound):
+            print "Increased the priority of CPU - bound process ID", self.pid, "to", self.priority," due to aging"
+        else:
+            print "Increased the priority of CPU - bound process ID", self.pid, "to", self.priority," due to aging"
+
     #increments wait_time by 1
     def incrementWaitTime(self):
         self.wait_time = self.wait_time + 1
@@ -183,8 +191,10 @@ cPQ = cPQueue(1)
 
 print "This is a test of FCFS, Lower PID -> Earlier Process"
 
-for i in range(1, 11):                                                        #If CPU Bound
-    cPQ.addItem(Process(random.randint(0, 1000), random.randint(0, 1000), 10, True))
+time = 0
+for i in range(1, 11):                  #If CPU Bound
+    p = Process(random.randint(0, 1000), random.randint(0, 1000), 10, True)
+    cPQ.addItem(p)
 
 while not cPQ.isEmpty():
 
