@@ -10,14 +10,23 @@ import random
 class Process:
     
     #Constructor, makes a Process Object
-    def __init__(self, burst, pid, priority):
+    def __init__(self, burst, pid, priority, cpu_bound):
         self.burst = burst
         self.pid = pid
         self.priority = priority
-        self.wait_time = 0        #time waiting in queue
-        self.turnaround_time = 0  #total turnaround time
-        self.run_time = 0         #time process has run so far (should == burst at end)
-        self.running_cpu = -1     #if this is negative, the process isn't running
+        self.wait_time = 0         #time waiting in queue
+        self.turnaround_time = 0   #total turnaround time
+        self.run_time = 0          #time process has run so far (should == burst at end)
+        self.running_cpu = -1      #if this is negative, the process isn't running
+        self.cpu_bound = cpu_bound #this is True if this process is CPU bound, False if interactive
+
+    #returns True if the process is IO bound (interactive)
+    def isInteractive(self):
+        return (not self.cpu_bound)
+
+    #returns True if the process is CPU bound
+    def isCPUBound(self):
+        return self.cpu_bound
 
     #returns if the process is running on a CPU
     def isRunning(self):
@@ -111,7 +120,6 @@ class cPQueue:
             
                 
 
-
         #If all else fails, add to end of List
         self._LQ.append(item)
         return True
@@ -161,6 +169,13 @@ class cPQueue:
             else:
                 i.incrementWaitTime()
 
+    #returns elements in cPQ
+    def getLength(self):
+        return len(self._LQ)
+
+    #returns last element in cPQ
+    def getLastElement(self):
+        return self._LQ[-1]
 
 #Entry Point
 
@@ -168,8 +183,8 @@ cPQ = cPQueue(1)
 
 print "This is a test of FCFS, Lower PID -> Earlier Process"
 
-for i in range(1, 11):
-    cPQ.addItem(Process(random.randint(0, 1000), random.randint(0, 1000), 10))
+for i in range(1, 11):                                                        #If CPU Bound
+    cPQ.addItem(Process(random.randint(0, 1000), random.randint(0, 1000), 10, True))
 
 while not cPQ.isEmpty():
 
