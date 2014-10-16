@@ -116,7 +116,11 @@ class cPQueue:
                 p = self._LQ[i];
                 if item.getBurst() < p.getBurst() - p.getRunTime():
                     self._LQ.insert(i, item)
-                    return True;                
+                    return True;        
+            #P_RR
+            if self.sortNum == 3:
+                pass
+                
             
                 
 
@@ -186,6 +190,9 @@ print "This is a test of FCFS, Lower PID -> Earlier Process"
 for i in range(1, 11):                                                        #If CPU Bound
     cPQ.addItem(Process(random.randint(0, 1000), random.randint(0, 1000), 10, True))
 
+#round robin,
+#
+#
 while not cPQ.isEmpty():
 
     #process is still running
