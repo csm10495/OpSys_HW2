@@ -10,7 +10,7 @@ import random
 class Process:
     
     #Constructor, makes a Process Object
-    def __init__(self, burst, pid, priority, cpu_bound):
+    def __init__(self, burst, pid, priority, cpu_bound, io_time):
         self.burst = burst
         self.pid = pid
         self.priority = priority
@@ -19,6 +19,11 @@ class Process:
         self.run_time = 0          #time process has run so far (should == burst at end)
         self.running_cpu = -1      #if this is negative, the process isn't running
         self.cpu_bound = cpu_bound #this is True if this process is CPU bound, False if interactive
+        self.io_time = io_time     #the amount of time the process is blocked on IO
+
+    #returns IO blocking time (time not on the queue after burst)
+    def getIOTime(self):
+        return self.io_time
 
     #returns True if the process is IO bound (interactive)
     def isInteractive(self):
@@ -115,16 +120,16 @@ class cPQueue:
             #SJF
             if self.sortNum == 1:
                 #Compare burst time
-                p = self._LQ[i];
+                p = self._LQ[i]
                 if item.getBurst() < p.getBurst():
                     self._LQ.insert(i, item)
-                    return True;
-            #P_SJF 
+                    return True
+            #P_SJF
             if self.sortNum == 2:
-                p = self._LQ[i];
+                p = self._LQ[i]
                 if item.getBurst() < p.getBurst() - p.getRunTime():
                     self._LQ.insert(i, item)
-                    return True;                
+                    return True                
             
                 
 
@@ -185,8 +190,28 @@ class cPQueue:
     def getLastElement(self):
         return self._LQ[-1]
 
-#Entry Point
 
+
+#gets a list of processes of size n
+#~80% of them are interactive (20 - 200ms burst)
+#blocking time of 1000-4500ms
+#other 20% is CPU bound (200 - 3000ms)
+#blocking ime of 1200-3200ms
+def getProcessList(n):
+    process_list = []
+    for i in range(n):
+        #interactive
+        if i < n * .8:
+            process_list.append(Process(random.randint(20, 200), i, random.randint(0, 4), False, random.randint(1000, 4500)))
+        else:
+            #CPU bound
+            process_list.append(Process(random.randint(200, 3000), i, random.randint(0, 4), True, random.randint(1200, 3200)))
+
+    return random.shuffle(process_list)
+
+a = getProcessList(14)
+
+#Entry Point
 cPQ = cPQueue(1)
 
 print "This is a test of FCFS, Lower PID -> Earlier Process"
