@@ -95,6 +95,21 @@ class cPQueue:
                 if self._LQ[i].getPID() > item.getPID():
                     self._LQ.insert(i, item)
                     return True
+            #SJF
+            if self.sortNum == 1:
+                #Compare burst time
+                p = self._LQ[i];
+                if item.getBurst() < p.getBurst():
+                    self._LQ.insert(i, item)
+                    return True;
+            #P_SJF 
+            if self.sortNum == 2:
+                p = self._LQ[i];
+                if item.getBurst() < p.getBurst() - p.getRunTime():
+                    self._LQ.insert(i, item)
+                    return True;                
+            
+                
 
 
         #If all else fails, add to end of List
@@ -148,7 +163,8 @@ class cPQueue:
 
 
 #Entry Point
-cPQ = cPQueue(0)
+
+cPQ = cPQueue(1)
 
 print "This is a test of FCFS, Lower PID -> Earlier Process"
 
