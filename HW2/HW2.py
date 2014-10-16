@@ -147,7 +147,7 @@ class cPQueue:
                 i.incrementWaitTime()
 
 
-
+#Entry Point
 cPQ = cPQueue(0)
 
 print "This is a test of FCFS, Lower PID -> Earlier Process"
@@ -168,6 +168,3 @@ while not cPQ.isEmpty():
 
 
 
-
-
-pass
