@@ -10,7 +10,7 @@ import random
 class Process:
     
     #Constructor, makes a Process Object
-    def __init__(self, burst, pid, priority, cpu_bound, io_time):
+    def __init__(self, burst, pid, priority, cpu_bound, io_time, b=None):
         self.burst = burst
         self.pid = pid
         self.priority = priority
@@ -19,7 +19,25 @@ class Process:
         self.run_time = 0          #time process has run so far (should == burst at end)
         self.running_cpu = -1      #if this is negative, the process isn't running
         self.cpu_bound = cpu_bound #this is True if this process is CPU bound, False if interactive
+        
+        #CPU Bound
+        if self.cpu_bound and not b:
+            self.b = 7
+        elif not self.cpu_bound and not b:
+            self.b = 0
+        else:
+            #b is set in constructor
+            self.b = b
+
         self.io_time = io_time     #the amount of time the process is blocked on IO
+
+    #gets cpu_bound
+    def isCPUBound(self):
+        return cpu_bound
+
+    #gets b
+    def getB(self):
+        return self.b
 
     #returns IO blocking time (time not on the queue after burst)
     def getIOTime(self):
@@ -315,7 +333,7 @@ def nonPreemptive(cPQ, n_CPU):
                     i[0].contextSwitch(cPQ.popTop())  #switches to None
                     print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
             count += 1
-        if not inuse:
+        if not inuse or inuse is False:
             break
 
 #cPQ is a cPriorityQueue
