@@ -203,8 +203,33 @@ class cPQueue:
     def getLastElement(self):
         return self._LQ[-1]
 
+#A CPU class
+class CPU:
+    #Constructor that doesn't set a running process
+    def CPU():
+        self.runningprocess = None
 
-cPQ = cPQueue(3)
+    #Constructor that does set a running process (p)
+    def CPU(self, p):
+        self.runningprocess = p;
+
+    #Attempts to make a context switch
+    #Returns True and changes the running process if a switch occurs
+    #Returns False if a context switch is not necessary and a switch doesn't occur
+    def contextSwitch(self, old_p, new_p):
+        if old_p.getPID() == new_p.getPID():
+            return False
+        else:
+            self.runningprocess = new_p
+            return True
+
+    #Returns True if this CPU is in use 
+    def isInUse(self):
+        if self.runningprocess == None:
+            return False
+        else:
+            return True
+
 
 #gets a list of processes of size n
 #~80% of them are interactive (20 - 200ms burst)
@@ -260,6 +285,8 @@ def preemptive(timeslice):
             else:
                 print "Process", p.getPID(), "will continue running because it is still first in queue"     #can't preempt yourself
             print "Finished: PID:", p.getPID(), " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+
+
 
 
 
