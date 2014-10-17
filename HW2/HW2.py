@@ -261,8 +261,16 @@ def getCPUList(n):
         lst.append([CPU(), 0])
     return lst
 
+#returns True if a CPU is busy
+def aCPUIsBusy(CPUs):
+    for i in CPUs:
+        if i[0].isInUse():
+            return True
+    return False
+
 #cPQ is a cPriorityQueue
 #n_CPU is the number of CPUs
+#Non Preemptive SJF
 def nonPreemptive(cPQ, n_CPU):  
     CPUs = getCPUList(n_CPU)
 
@@ -291,8 +299,55 @@ def nonPreemptive(cPQ, n_CPU):
         cPQ.incWaitTimes()
         cPQ.incTurnAroundTimes()
 
+#cPQ is a cPriorityQueue
+#n_CPU is the number of CPUs
+#SJF Preemptive
+def Preemptive(cPQ, n_CPU):  
+    CPUs = getCPUList(n_CPU)
 
-def preemptive(timeslice):
+    #initial adding
+    for i in CPUs:
+        if cPQ.isEmpty():
+            break
+        i[0].contextSwitch(cPQ.popTop())
+        i[0].incrementTimes()
+
+    cPQ.incWaitTimes()
+    cPQ.incTurnAroundTimes()
+
+
+    while not cPQ.isEmpty():
+        count = 1
+        for i in CPUs:
+            if not cPQ.isEmpty():
+                cPQ.addItem(i[0].getRunningProcess())  #add current CPU process back to cPQ to see if it should be preempted
+                if (cPQ.peekTop().getPID() != i[0].getRunningProcess().getPID()):
+                    #PREEMPTION
+                    p = i[0].getRunningProcess()
+                    i[0].contextSwitch(cPQ.popTop())  #CONTEXT SWITCH BECAUSE OF PREEMPTION
+                    print "PID:", p.getPID(), "Preempted this Process on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+                else:
+                    cPQ.popTop()
+
+            if i[0].getRunningProcess().isDone() and not cPQ.isEmpty():
+                p = i[0].getRunningProcess()
+                i[0].contextSwitch(cPQ.popTop())  #CONTEXT SWITCH BECAUSE OF BURST COMPLETION
+                print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+
+            if not i[0].getRunningProcess().isDone():  #if the current process on CPU i[0] is not done
+                i[0].incrementTimes()
+
+            count += 1
+
+        cPQ.incWaitTimes()
+        cPQ.incTurnAroundTimes()
+
+
+
+
+
+def RoundRobin(timeslice):
+
     while not cPQ.isEmpty():
         tDelta = 0
         p = cPQ.popTop() #current process in the queue
@@ -323,7 +378,7 @@ def preemptive(timeslice):
 
 a = getProcessList(14)
 
-cPQ = cPQueue(1)
+cPQ = cPQueue(2)
 
 time = 0
 for i in a:
@@ -334,4 +389,4 @@ for i in a:
     cPQ.addItem(i)
 
 
-nonPreemptive(cPQ, 4)
+Preemptive(cPQ, 4)
