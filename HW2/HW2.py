@@ -210,6 +210,8 @@ class CPU:
     #Returns False if a context switch is not necessary and a switch doesn't
     #occur
     def contextSwitch(self, new_p):
+        if not new_p:
+            self.runningprocess = new_p
         if not self.runningprocess:
             self.runningprocess = new_p
             return True
@@ -299,6 +301,23 @@ def nonPreemptive(cPQ, n_CPU):
         cPQ.incWaitTimes()
         cPQ.incTurnAroundTimes()
 
+    #Clear out processes already in CPUs
+    while True:
+        inuse = False
+        count = 1
+        for i in CPUs:
+            if i[0].isInUse():
+                inuse = True
+                i[0].incrementTimes()
+
+                if i[0].getRunningProcess().isDone():
+                    p = i[0].getRunningProcess()
+                    i[0].contextSwitch(cPQ.popTop())  #switches to None
+                    print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+            count += 1
+        if not inuse:
+            break
+
 #cPQ is a cPriorityQueue
 #n_CPU is the number of CPUs
 #SJF Preemptive
@@ -341,6 +360,23 @@ def Preemptive(cPQ, n_CPU):
 
         cPQ.incWaitTimes()
         cPQ.incTurnAroundTimes()
+
+    #Clear out processes already in CPUs
+    while True:
+        inuse = False
+        count = 1
+        for i in CPUs:
+            if i[0].isInUse():
+                inuse = True
+                i[0].incrementTimes()
+
+                if i[0].getRunningProcess().isDone():
+                    p = i[0].getRunningProcess()
+                    i[0].contextSwitch(cPQ.popTop())  #switches to None
+                    print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+            count += 1
+        if not inuse:
+            break
 
 
 
@@ -389,4 +425,6 @@ for i in a:
     cPQ.addItem(i)
 
 
-Preemptive(cPQ, 4)
+nonPreemptive(cPQ, 13)
+
+print "Done!"
