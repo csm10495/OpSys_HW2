@@ -373,9 +373,11 @@ def Preemptive(cPQ, n_CPU):
                 if i[0].getRunningProcess().isDone():
                     p = i[0].getRunningProcess()
                     i[0].contextSwitch(cPQ.popTop())  #switches to None
-                    if p.cpu_bound
+                    if p.cpu_bound:
                         print "[time",time,"ms] CPU bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
-                    print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+                    else:
+                        print "[time",time,"ms] CPU bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
+                        #print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
             count += 1
         if not inuse:
             break
