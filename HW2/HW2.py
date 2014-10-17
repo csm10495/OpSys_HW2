@@ -325,14 +325,14 @@ def Preemptive(cPQ, n_CPU):
                     #PREEMPTION
                     p = i[0].getRunningProcess()
                     i[0].contextSwitch(cPQ.popTop())  #CONTEXT SWITCH BECAUSE OF PREEMPTION
-                    print "PID:", p.getPID(), "Preempted this Process on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+                    print "[time",time,"ms] context switch(swapping out process ID ", p.getPID()," for process ID", i[0].getRunningProcess().getPID(),")"
                 else:
                     cPQ.popTop()
 
             if i[0].getRunningProcess().isDone() and not cPQ.isEmpty():
                 p = i[0].getRunningProcess()
                 i[0].contextSwitch(cPQ.popTop())  #CONTEXT SWITCH BECAUSE OF BURST COMPLETION
-                print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+                print "[time",time,"ms] context switch(swapping out process ID ", p.getPID()," for process ID", i[0].getRunningProcess().getPID(),")"
 
             if not i[0].getRunningProcess().isDone():  #if the current process on CPU i[0] is not done
                 i[0].incrementTimes()
