@@ -382,39 +382,82 @@ def Preemptive(cPQ, n_CPU):
 
 
 
-def RoundRobin(timeslice):
+def RoundRobin(cPQ, n_CPU, timeslice):
+    CPUs = getCPUList(n_CPU)
 
+    #initial adding
+    for i in CPUs:
+        if cPQ.isEmpty():
+            break
+        i[0].contextSwitch(cPQ.popTop())
+        i[0].incrementTimes()
+
+    cPQ.incWaitTimes()
+    cPQ.incTurnAroundTimes()
+
+    dt = [0 for i in range(n_CPU)]
     while not cPQ.isEmpty():
-        tDelta = 0
-        p = cPQ.popTop() #current process in the queue
-        while tDelta < timeslice:
-            tDelta += 1
-        
-            #check if the process is still running
-            if(not p.isDone()):
-                p.incrementRunTime()
-                p.incrementTurnaroundTime() #need to do this because it has been popped from cPQ
-                cPQ.incWaitTimes()
-                cPQ.incTurnAroundTimes()
-            else:
-                break
-        
-        #if the process has not finished, re add it to the queue
-        if(not p.isDone()):
-            cPQ.addItem(p)
-            if (p.getPID() != cPQ.peekTop().getPID()):
-                print "This Process has been Preempted: PID:", p.getPID(), " Burst:", p.getBurst(), " RunTime:", p.getRunTime()
-            else:
-                print "Process", p.getPID(), "will continue running because it is still first in queue"     #can't preempt yourself
-            print "Finished: PID:", p.getPID(), " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+        index = 0        # Keep track of the current deltaTime index
+        count = 1        # Keep track of the current CPU number
+
+        for i in CPUs:            
+            resetDelta = False         
+            dt[index] += 1 # Update delta time
+            
+            # BURST CHECK
+            if i[0].getRunningProcess().isDone() and not cPQ.isEmpty():                
+                resetDelta = True                     # SINCE THE PROCESS HAS FINISHED, RESET DT FOR THE NEXT PROCESS
+                p = i[0].getRunningProcess() 
+                i[0].contextSwitch(cPQ.popTop())      # CONTEXT SWITCH BECAUSE OF BURST COMPLETION
+            
+                print "[burst][time",time,"ms] context switch(swapping out process ID ", p.getPID()," for process ID", i[0].getRunningProcess().getPID(),")"
+                print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+                
+            # TIMESLICE CHECK
+            if not cPQ.isEmpty():                     # if other processes still exist
+                if(dt[index] >= timeslice):
+                                                      # ROUND ROBIN PREEMPTION OCCURS
+                    resetDelta = True                 # need to reset deltaTime[i]
+                    p = i[0].getRunningProcess()      # STORE THE OLD PROCESS (ALREADY BACK IN cPQ)
+                    cPQ.addItem(p)                    # Add this to the end of the cPQ
+                    i[0].contextSwitch(cPQ.popTop())  # CONTEXT SWITCH BECAUSE OF PREEMPTION
+                    print "[slice][time",time,"ms] context switch(swapping out process ID ", p.getPID()," for process ID", i[0].getRunningProcess().getPID(),")"
+
+            if not i[0].getRunningProcess().isDone():  #if the current process on CPU i[0] is not done
+                i[0].incrementTimes()
+            
+            if resetDelta:      # if the time needs to be reset due to preemption,                
+                dt[index] = 0   # Increment the deltaTime for the process on the current cpu                
+
+            count += 1 
+            index += 1          # increment current dt index
+
+        cPQ.incWaitTimes()
+        cPQ.incTurnAroundTimes()
+
+    #Clear out processes already in CPUs
+    while True:
+        inuse = False
+        count = 1
+        for i in CPUs:
+            if i[0].isInUse():
+                inuse = True
+                i[0].incrementTimes()
+                if i[0].getRunningProcess().isDone():
+                    p = i[0].getRunningProcess()
+                    i[0].contextSwitch(cPQ.popTop())  #switches to None
+                    print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+            count += 1
+        if not inuse:
+            break
 
 
 
 
 
-a = getProcessList(14)
+a = getProcessList(2)
 
-cPQ = cPQueue(2)
+cPQ = cPQueue(3)
 
 time = 0
 for i in a:
@@ -425,6 +468,7 @@ for i in a:
     cPQ.addItem(i)
 
 
-nonPreemptive(cPQ, 13)
+print "\n--------------Start:\n"
+RoundRobin(cPQ, 1, 5)
 
 print "Done!"
