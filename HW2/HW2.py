@@ -311,7 +311,7 @@ def nonPreemptive(cPQ, n_CPU):
             if i[0].getRunningProcess().isDone() and not cPQ.isEmpty():
                 p = i[0].getRunningProcess()
                 i[0].contextSwitch(cPQ.popTop())  #CONTEXT SWITCH
-                print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+                print "[time",time,"ms] context switch(swapping out process ID ", p.getPID()," for process ID", i[0].getRunningProcess().getPID(),")"
             if not i[0].getRunningProcess().isDone():
                 i[0].incrementTimes()
             count += 1
@@ -331,7 +331,11 @@ def nonPreemptive(cPQ, n_CPU):
                 if i[0].getRunningProcess().isDone():
                     p = i[0].getRunningProcess()
                     i[0].contextSwitch(cPQ.popTop())  #switches to None
-                    print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+                    if p.cpu_bound:
+                        print "[time",time,"ms] CPU bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
+                    else:
+                        print "[time",time,"ms] CPU bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
+                    #print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
             count += 1
         if not inuse or inuse is False:
             break
@@ -391,7 +395,11 @@ def Preemptive(cPQ, n_CPU):
                 if i[0].getRunningProcess().isDone():
                     p = i[0].getRunningProcess()
                     i[0].contextSwitch(cPQ.popTop())  #switches to None
-                    print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+                    if p.cpu_bound:
+                        print "[time",time,"ms] CPU bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
+                    else:
+                        print "[time",time,"ms] CPU bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
+                        #print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
             count += 1
         if not inuse:
             break
