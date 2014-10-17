@@ -109,6 +109,10 @@ class Process:
     #returns True if the process has finished its needed burst time
     #if run_time == burst
     def isDone(self):
+        if self.cpu_bound:
+            print "[time",time,"ms] CPU bound process ID ", self.pid," terminated (avg turnaround time ", self.turnaround_time,"Total wait time",self.wait_time,"ms)"
+        else:
+            print "[time",time,"ms] Interactive process ID ", self.pid," terminated (avg turnaround time ", self.turnaround_time,"Total wait time",self.wait_time,"ms)"
         return self.burst == self.run_time
 
 #Priority Queue class based on a certain key
