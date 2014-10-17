@@ -319,6 +319,13 @@ def nonPreemptive(cPQ, n_CPU):
         cPQ.incWaitTimes()
         cPQ.incTurnAroundTimes()
 
+    #gets number of currently alive CPUs
+    num_alive_CPUs = 0
+    for i in CPUs:
+        if i[0].isInUse():
+            num_alive_CPUs += 1
+
+
     #Clear out processes already in CPUs
     while True:
         inuse = False
@@ -334,10 +341,11 @@ def nonPreemptive(cPQ, n_CPU):
                     if p.cpu_bound:
                         print "[time",time,"ms] CPU bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
                     else:
-                        print "[time",time,"ms] CPU bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
+                        print "[time",time,"ms] Interactive bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
+                    num_alive_CPUs -= 1
                     #print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
             count += 1
-        if not inuse or inuse is False:
+        if not inuse or inuse is False or num_alive_CPUs == 0:
             break
 
 #cPQ is a cPriorityQueue
