@@ -324,6 +324,7 @@ def nonPreemptive(cPQ, n_CPU):
             if not i[0].getRunningProcess().isDone():
                 i[0].incrementTimes()
             count += 1
+            time+=1
         
         cPQ.incWaitTimes()
         cPQ.incTurnAroundTimes()
@@ -398,6 +399,7 @@ def Preemptive(cPQ, n_CPU):
                 i[0].incrementTimes()
 
             count += 1
+            time+=1
 
         cPQ.incWaitTimes()
         cPQ.incTurnAroundTimes()
@@ -431,7 +433,9 @@ def Preemptive(cPQ, n_CPU):
             break
         time+=1
 
+def PremtivePriority(cPQ){
 
+}
 
 
 
