@@ -114,6 +114,7 @@ class Process:
         else:
             print "[time",time,"ms] Interactive process ID ", self.pid," terminated (avg turnaround time ", self.turnaround_time,"Total wait time",self.wait_time,"ms)"
         return self.burst == self.run_time
+        return self.burst <= self.run_time
 
 #Priority Queue class based on a certain key
 class cPQueue:
@@ -233,7 +234,7 @@ class CPU:
     #occur
     def contextSwitch(self, new_p):
         if not new_p:
-            self.runningprocess = new_p
+            self.runningprocess = None
         if not self.runningprocess:
             self.runningprocess = new_p
             return True
@@ -395,6 +396,12 @@ def Preemptive(cPQ, n_CPU):
         cPQ.incWaitTimes()
         cPQ.incTurnAroundTimes()
 
+    #gets number of currently alive CPUs
+    num_alive_CPUs = 0
+    for i in CPUs:
+        if i[0].isInUse():
+            num_alive_CPUs += 1
+
     #Clear out processes already in CPUs
     while True:
         inuse = False
@@ -410,10 +417,11 @@ def Preemptive(cPQ, n_CPU):
                     if p.cpu_bound:
                         print "[time",time,"ms] CPU bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
                     else:
-                        print "[time",time,"ms] CPU bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
+                        print "[time",time,"ms] Interactive bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
                         #print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+                    num_alive_CPUs -= 1
             count += 1
-        if not inuse:
+        if not inuse or num_alive_CPUs == 0:
             break
 
 
@@ -463,6 +471,6 @@ for i in a:
     cPQ.addItem(i)
 
 
-nonPreemptive(cPQ, 13)
+Preemptive(cPQ, 13)
 
 print "Done!"
