@@ -224,21 +224,6 @@ def getProcessList(n):
     random.shuffle(process_list)
     return process_list
 
-a = getProcessList(14)
-
-#Entry Point
-cPQ = cPQueue(1)
-
-print "This is a test of FCFS, Lower PID -> Earlier Process"
-
-time = 0
-for i in a:
-    if(i.isCPUBound()):#print that an item has been added
-        print "CPU-bound process ",i.getPID()," entered the ready queue (requires ",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
-    else:
-        print "Interactive process ",i.getPID()," entered the ready queue (requires ",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
-    cPQ.addItem(i)
-
 def nonPreemptive():
     while not cPQ.isEmpty():
 
@@ -251,9 +236,6 @@ def nonPreemptive():
             p = cPQ.popTop()
             print "PID:", p.getPID(), " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
 
-
-
-#def preemptive():
 def preemptive(timeslice):
     while not cPQ.isEmpty():
         tDelta = 0
@@ -278,6 +260,20 @@ def preemptive(timeslice):
             else:
                 print "Process", p.getPID(), "will continue running because it is still first in queue"     #can't preempt yourself
             print "Finished: PID:", p.getPID(), " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+
+
+
+a = getProcessList(14)
+
+cPQ = cPQueue(1)
+
+time = 0
+for i in a:
+    if(i.isCPUBound()):#print that an item has been added
+        print "CPU-bound process ",i.getPID()," entered the ready queue (requires ",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
+    else:
+        print "Interactive process ",i.getPID()," entered the ready queue (requires ",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
+    cPQ.addItem(i)
 
 
 preemptive(100)
