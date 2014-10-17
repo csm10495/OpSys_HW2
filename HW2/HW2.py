@@ -7,6 +7,8 @@ import random
 #Burst time: burst
 #Process ID: pid
 #Priority: priority
+
+time = 0
 class Process:
     
     #Constructor, makes a Process Object
@@ -109,11 +111,12 @@ class Process:
     #returns True if the process has finished its needed burst time
     #if run_time == burst
     def isDone(self):
-        if self.cpu_bound:
-            print "[time",time,"ms] CPU bound process ID ", self.pid," terminated (avg turnaround time ", self.turnaround_time,"Total wait time",self.wait_time,"ms)"
-        else:
-            print "[time",time,"ms] Interactive process ID ", self.pid," terminated (avg turnaround time ", self.turnaround_time,"Total wait time",self.wait_time,"ms)"
-        return self.burst == self.run_time
+        global time
+        if self.burst <= self.run_time:
+            if self.cpu_bound:
+                print "[time",time,"ms] CPU bound process ID ", self.pid," terminated (avg turnaround time ", self.turnaround_time,"Total wait time",self.wait_time,"ms)"
+            else:
+                print "[time",time,"ms] Interactive process ID ", self.pid," terminated (avg turnaround time ", self.turnaround_time,"Total wait time",self.wait_time,"ms)"
         return self.burst <= self.run_time
 
 #Priority Queue class based on a certain key
@@ -297,6 +300,7 @@ def aCPUIsBusy(CPUs):
 #n_CPU is the number of CPUs
 #Non Preemptive SJF
 def nonPreemptive(cPQ, n_CPU):  
+    global time
     CPUs = getCPUList(n_CPU)
 
     #initial adding
@@ -352,11 +356,13 @@ def nonPreemptive(cPQ, n_CPU):
             count += 1
         if not inuse or inuse is False or num_alive_CPUs == 0:
             break
+        time+=1
 
 #cPQ is a cPriorityQueue
 #n_CPU is the number of CPUs
 #SJF Preemptive
 def Preemptive(cPQ, n_CPU):  
+    global time
     CPUs = getCPUList(n_CPU)
 
     #initial adding
@@ -423,6 +429,7 @@ def Preemptive(cPQ, n_CPU):
             count += 1
         if not inuse or num_alive_CPUs == 0:
             break
+        time+=1
 
 
 
@@ -462,7 +469,7 @@ a = getProcessList(14)
 
 cPQ = cPQueue(2)
 
-time = 0
+#time = 0
 for i in a:
     if(i.isCPUBound()):#print that an item has been added
         print "CPU-bound process ",i.getPID()," entered the ready queue (requires ",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
