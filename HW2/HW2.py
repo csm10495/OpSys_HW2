@@ -185,15 +185,10 @@ class cPQueue:
             i.incrementTurnaroundTime()
 
     #increments all waittimes in Queue
-    #(for processes past [0])
+    #(for ALL processes)
     def incWaitTimes(self):
-        first = True
         for i in self._LQ:
-            if first:
-                first = False
-                continue
-            else:
-                i.incrementWaitTime()
+            i.incrementWaitTime()
 
     #returns elements in cPQ
     def getLength(self):
@@ -205,30 +200,40 @@ class cPQueue:
 
 #A CPU class
 class CPU:
-    #Constructor that doesn't set a running process
-    def CPU():
-        self.runningprocess = None
 
     #Constructor that does set a running process (p)
-    def CPU(self, p):
-        self.runningprocess = p;
+    def __init__(self, p=None):
+        self.runningprocess = p
 
     #Attempts to make a context switch
     #Returns True and changes the running process if a switch occurs
-    #Returns False if a context switch is not necessary and a switch doesn't occur
-    def contextSwitch(self, old_p, new_p):
-        if old_p.getPID() == new_p.getPID():
+    #Returns False if a context switch is not necessary and a switch doesn't
+    #occur
+    def contextSwitch(self, new_p):
+        if not self.runningprocess:
+            self.runningprocess = new_p
+            return True
+        if self.runningprocess.getPID() == new_p.getPID():
             return False
         else:
             self.runningprocess = new_p
             return True
 
-    #Returns True if this CPU is in use 
+    #Returns True if this CPU is in use
     def isInUse(self):
         if self.runningprocess == None:
             return False
         else:
             return True
+
+    #increments necessary times of process in CPU
+    def incrementTimes(self):
+        self.runningprocess.incrementRunTime()
+        self.runningprocess.incrementTurnaroundTime()
+
+    #returns the currently running process
+    def getRunningProcess(self):
+        return self.runningprocess
 
 
 #gets a list of processes of size n
@@ -249,17 +254,43 @@ def getProcessList(n):
     random.shuffle(process_list)
     return process_list
 
-def nonPreemptive():
-    while not cPQ.isEmpty():
+#returns a list of n [CPUs, 0]
+def getCPUList(n):
+    lst = []
+    for i in range(n):
+        lst.append([CPU(), 0])
+    return lst
 
-        #process is still running
-        if (not cPQ.peekTop().isDone()):
-            cPQ.peekTop().incrementRunTime()
-            cPQ.incWaitTimes()
-            cPQ.incTurnAroundTimes()
-        else:
-            p = cPQ.popTop()
-            print "PID:", p.getPID(), " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+#cPQ is a cPriorityQueue
+#n_CPU is the number of CPUs
+def nonPreemptive(cPQ, n_CPU):  
+    CPUs = getCPUList(n_CPU)
+
+    #initial adding
+    for i in CPUs:
+        if cPQ.isEmpty():
+            break
+        i[0].contextSwitch(cPQ.popTop())
+        i[0].incrementTimes()
+
+    cPQ.incWaitTimes()
+    cPQ.incTurnAroundTimes()
+
+    while not cPQ.isEmpty():
+        count = 1
+        for i in CPUs:
+            #the process on this CPU is done and we have another to give it
+            if i[0].getRunningProcess().isDone() and not cPQ.isEmpty():
+                p = i[0].getRunningProcess()
+                i[0].contextSwitch(cPQ.popTop())  #CONTEXT SWITCH
+                print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
+            if not i[0].getRunningProcess().isDone():
+                i[0].incrementTimes()
+            count += 1
+        
+        cPQ.incWaitTimes()
+        cPQ.incTurnAroundTimes()
+
 
 def preemptive(timeslice):
     while not cPQ.isEmpty():
@@ -303,4 +334,4 @@ for i in a:
     cPQ.addItem(i)
 
 
-preemptive(100)
+nonPreemptive(cPQ, 4)
