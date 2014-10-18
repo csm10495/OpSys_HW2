@@ -24,7 +24,7 @@ class Process:
         
         #CPU Bound
         if self.cpu_bound and not b:
-            self.b = 7
+            self.b = 8
         elif not self.cpu_bound and not b:
             self.b = 0
         else:
@@ -125,6 +125,7 @@ class cPQueue:
     #Constructor, initializes empty quque
     def __init__(self, sortNum):
         self._LQ = []
+        self._WP = {}
         self.sortNum = sortNum
 
     #adds an item to _LQ, sorts as it goes
@@ -223,6 +224,27 @@ class cPQueue:
     #returns last element in cPQ
     def getLastElement(self):
         return self._LQ[-1]
+    
+    #[this should be called by the current running algorithm, when process burst time reached]
+    #add a user simulated process that re enters the queue after a set time
+    def addWaitingProcess(process):
+        self._WP[process] = waitTime
+        
+    #[this should be called after EVERY time interval]
+    #update the waiting user simulated processes
+    def updateWaitingProcesses():
+        for key, value in self._WP:
+            #decrease the remaining wait time
+            value -= 1
+            
+            #if the remaining wait time is less than 0, re-introduce to pq
+            if(value < 0):
+                self.addItem(p)
+                del self._WP[key]
+            #otherwise update the wait time
+            else:
+                self._WP[key] = value                
+        
 
 #A CPU class
 class CPU:
@@ -281,6 +303,9 @@ def getProcessList(n):
 
     random.shuffle(process_list)
     return process_list
+
+def getProcess(b):
+    return Process(random.randint(200, 3000), i, random.randint(0, 4), True, random.randint(1200, 3200), b) 
 
 #returns a list of n [CPUs, 0]
 def getCPUList(n):
@@ -362,6 +387,17 @@ def nonPreemptive(cPQ, n_CPU):
         if not inuse or inuse is False or num_alive_CPUs == 0:
             break
         time+=1
+        
+
+#[this should be called whenever a process ends]
+#checks if the process should be addded to the waitingProcessDict
+def simulateUser(cPQ, process):
+    
+    #add the process SECOND, other wise the wait time will be updated prematurely
+    if process.isCPUBound() and process.getB() > 0:
+        p = getProcess( process.getB() - 1 )
+        cPQ.addWaitingProcess(p)
+    
 
 #cPQ is a cPriorityQueue
 #n_CPU is the number of CPUs
@@ -380,7 +416,6 @@ def Preemptive(cPQ, n_CPU):
 
     cPQ.incWaitTimes()
     cPQ.incTurnAroundTimes()
-
 
     while not cPQ.isEmpty():
         count = 1
@@ -442,6 +477,7 @@ def Preemptive(cPQ, n_CPU):
         if not inuse or num_alive_CPUs == 0:
             break
         time+=1
+<<<<<<< HEAD
 
 def PreemptivePriority(cPQ, n_CPU):
     
@@ -489,6 +525,12 @@ def PreemptivePriority(cPQ, n_CPU):
 
             if not i[0].getRunningProcess().isDone():  #if the current process on CPU i[0] is not done
                 i[0].incrementTimes()
+=======
+
+def PremtivePriority(cPQ):
+    pass
+
+>>>>>>> 65df9bbae71ad5d4f750d819b9f5692b8d1c5f74
 
             count += 1
             time+=1
