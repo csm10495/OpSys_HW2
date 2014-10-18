@@ -478,7 +478,6 @@ def Preemptive(cPQ, n_CPU):
         if not inuse or num_alive_CPUs == 0:
             break
         time+=1
-<<<<<<< HEAD
 
 def PreemptivePriority(cPQ, n_CPU):
     
@@ -526,23 +525,19 @@ def PreemptivePriority(cPQ, n_CPU):
 
             if not i[0].getRunningProcess().isDone():  #if the current process on CPU i[0] is not done
                 i[0].incrementTimes()
-=======
+
 
 def PremtivePriority(cPQ):
-    pass
-
->>>>>>> 65df9bbae71ad5d4f750d819b9f5692b8d1c5f74
-
-            count += 1
-            time+=1
-            dt+=1
-        if(dt-1200)>=0:
-            for p in cPQ:
-                p.incPriority()
-            dt = 0
+    count += 1
+    time+=1
+    dt+=1
+    if(dt-1200)>=0:
+        for p in cPQ:
+            p.incPriority()
+        dt = 0
         
-        cPQ.incWaitTimes()
-        cPQ.incTurnAroundTimes()
+    cPQ.incWaitTimes()
+    cPQ.incTurnAroundTimes()
 
     #gets number of currently alive CPUs
     num_alive_CPUs = 0
@@ -672,12 +667,12 @@ def run(algorithm, num_processes, n_CPU, timeslice=100):
     if algorithm > 0 and algorithm <=4 and num_processes > 0 and n_CPU > 0:
         cPQ = cPQueue(algorithm)
         a = getProcessList(num_processes)
-for i in a:
-    if(i.isCPUBound()):#print that an item has been added
-        print "CPU-bound process ",i.getPID()," entered the ready queue (requires ",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
-    else:
-        print "Interactive process ",i.getPID()," entered the ready queue (requires ",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
-    cPQ.addItem(i)
+        for i in a:
+            if(i.isCPUBound()):#print that an item has been added
+                print "CPU-bound process ",i.getPID()," entered the ready queue (requires ",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
+            else:
+                print "Interactive process ",i.getPID()," entered the ready queue (requires ",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
+            cPQ.addItem(i)
         if algorithm == 1:
             print "Non Preemptive SJF with", num_processes, "Processes,", n_CPU, "Processors"
             nonPreemptive(cPQ, n_CPU)
