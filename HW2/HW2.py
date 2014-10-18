@@ -526,18 +526,16 @@ def PreemptivePriority(cPQ, n_CPU):
             if not i[0].getRunningProcess().isDone():  #if the current process on CPU i[0] is not done
                 i[0].incrementTimes()
 
-
-def PremtivePriority(cPQ):
-    count += 1
-    time+=1
-    dt+=1
-    if(dt-1200)>=0:
-        for p in cPQ:
-            p.incPriority()
-        dt = 0
+            count += 1
+            time+=1
+            dt+=1
+        if(dt-1200)>=0:
+            for p in cPQ:
+                p.incPriority()
+            dt = 0
         
-    cPQ.incWaitTimes()
-    cPQ.incTurnAroundTimes()
+        cPQ.incWaitTimes()
+        cPQ.incTurnAroundTimes()
 
     #gets number of currently alive CPUs
     num_alive_CPUs = 0
@@ -567,7 +565,7 @@ def PremtivePriority(cPQ):
             count += 1
             time+=1
             dt+=1
-
+            
         if not inuse or num_alive_CPUs == 0:
             break
         time+=1
@@ -684,7 +682,7 @@ def run(algorithm, num_processes, n_CPU, timeslice=100):
             RoundRobin(cPQ, n_CPU)
         elif algorithm == 4:
             print "Preemptive Priority with", num_processes, "Processes,", n_CPU, "Processors"
-            PremtivePriority(cPQ, n_CPU)
+            PreemptivePriority(cPQ, n_CPU)
     else:
         print "Bad input parameters"
         print "(1-4) (1-n) (1-n) <1-n>"
