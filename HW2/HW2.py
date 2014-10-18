@@ -2,6 +2,7 @@
 #Charles Machalow...and theoretically others
 
 import random
+import sys
 
 #Process Class
 #Burst time: burst
@@ -450,7 +451,7 @@ def PremtivePriority(cPQ):
 
 
 
-def RoundRobin(cPQ, n_CPU, timeslice):
+def RoundRobin(cPQ, n_CPU, timeslice=100):
     CPUs = getCPUList(n_CPU)
 
     #initial adding
@@ -519,25 +520,75 @@ def RoundRobin(cPQ, n_CPU, timeslice):
         if not inuse:
             break
 
+#prints help, usage
+def printHelp():
+    print "Usage:"
+    print "HW2.py <(int) Algorithm type> <(int) Number of processess> <(int) Number of processors> <(int)timeslice>"
+    print "Algorithm Types:"
+    print "     1: SJF No Preemption"
+    print "     2: SJF With Preemption"
+    print "     3: Round Robin"
+    print "     4: Preemptive Priority"
+    print "Number of Processes: 1...n"
+    print "Number of Processors: 1...n"
+    print "Timeslice: timeslice for Round Robin, ignored otherwise"
+    print "If No arguments provided: Autoruns 'HW2.py 1 14 4'"
+    print "SJF No Preemption with 14 processes and 4 processors"
 
-
-
-
-a = getProcessList(2)
-
-cPQ = cPQueue(3)
-
-#time = 0
-for i in a:
-    if(i.isCPUBound()):#print that an item has been added
-        print "CPU-bound process ",i.getPID()," entered the ready queue (requires ",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
+#runs according to command-line arguments
+def run(algorithm, num_processes, n_CPU, timeslice=100):
+    if algorithm > 0 and algorithm <=4 and num_processes > 0 and n_CPU > 0:
+        cPQ = cPQueue(algorithm)
+        a = getProcessList(num_processes)
+        for i in a:
+            if(i.isCPUBound()):#print that an item has been added
+                print "CPU-bound process ",i.getPID()," entered the ready queue (requires ",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
+            else:
+                print "Interactive process ",i.getPID()," entered the ready queue (requires ",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
+        cPQ.addItem(i)
+        if algorithm == 1:
+            print "Non Preemptive SJF with", num_processes, "Processes,", n_CPU, "Processors"
+            nonPreemptive(cPQ, n_CPU)
+        elif algorithm == 2:
+            print "Preemptive SFJ with", num_processes, "Processes,", n_CPU, "Processors"
+            Preemptive(cPQ, n_CPU)
+        elif algorithm == 3:
+            print "Round Robin with ", num_processes, "Processes,", n_CPU, "Processors,", timeslice, "ms timeslice"
+            RoundRobin(cPQ, n_CPU)
+        elif algorithm == 4:
+            print "Preemptive Priority with", num_processes, "Processes,", n_CPU, "Processors"
+            PremtivePriority(cPQ, n_CPU)
     else:
-        print "Interactive process ",i.getPID()," entered the ready queue (requires ",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
-    cPQ.addItem(i)
+        print "Bad input parameters"
+        print "(1-4) (1-n) (1-n) <1-n>"
 
+done = False
 
-print "\n--------------Start:\n"
-RoundRobin(cPQ, 1, 5)
+if len(sys.argv) == 2 and (sys.argv[1] == "?" or sys.argv[1] == "/?" or sys.argv[1] == "help"):
+    printHelp()
+    done = True
 
+algorithm = -1
+num_processes = -1
+n_CPU = -1
+timeslice = 100
 
-print "Done!"
+if len(sys.argv) == 1:
+    print "Going with defaults: SJF No Preemption with 14 processes and 4 processors"
+    algorithm = 1
+    num_processes = 14
+    n_CPU = 4
+
+if len(sys.argv) >= 4:
+    algorithm = int(sys.argv[1])
+    num_processes = int(sys.argv[2])
+    n_CPU = int(sys.argv[3])
+    if algorithm == 4 and len(sys.argv) == 4:
+        print "Assuming RR timeslice = 100"
+
+if len(sys.argv) == 5:
+    timeslice = int(sys.argv[4])
+
+if not done:
+    run(algorithm, num_processes, n_CPU, timeslice)
+    print "Done!"
