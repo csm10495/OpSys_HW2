@@ -498,7 +498,7 @@ def Preemptive(cPQ, n_CPU):
 def PreemptivePriority(cPQ, n_CPU):
     
     global time
-    dt = 0 #needed to update priority
+    #dt = 0 #needed to update priority
     CPUs = getCPUList(n_CPU)
 
     #initial adding
@@ -506,8 +506,8 @@ def PreemptivePriority(cPQ, n_CPU):
         if cPQ.isEmpty():
             break
         i[0].contextSwitch(cPQ.popTop())
-        time += 1
         i[0].incrementTimes()
+    time += 1
 
     cPQ.incWaitTimes()
     cPQ.incTurnAroundTimes()
@@ -522,10 +522,10 @@ def PreemptivePriority(cPQ, n_CPU):
                     #PREEMPTION
                     p = i[0].getRunningProcess()
                     time += 1
-                    dt+=1
+                    #dt+=1
                     i[0].contextSwitch(cPQ.popTop())  #CONTEXT SWITCH BECAUSE OF PREEMPTION
                     time += 1
-                    dt+=1
+                    #dt+=1
                     print "[time",time,"ms] context switch(swapping out process ID ", p.getPID()," for process ID", i[0].getRunningProcess().getPID(),")"
                 else:
                     cPQ.popTop()
@@ -533,19 +533,19 @@ def PreemptivePriority(cPQ, n_CPU):
             if i[0].getRunningProcess().isDone() and not cPQ.isEmpty():
                 p = i[0].getRunningProcess()
                 time+=1
-                dt+=1
+                #dt+=1
                 i[0].contextSwitch(cPQ.popTop())  #CONTEXT SWITCH BECAUSE OF BURST COMPLETION
                 time+=1
-                dt+=1
+                #dt+=1
                 print "[time",time,"ms] context switch(swapping out process ID ", p.getPID()," for process ID", i[0].getRunningProcess().getPID(),")"
 
             if not i[0].getRunningProcess().isDone():  #if the current process on CPU i[0] is not done
                 i[0].incrementTimes()
 
             count += 1
-            time+=1
-            dt+=1
-        
+            #dt+=1
+
+        time+=1
         cPQ.incPriorities()
         cPQ.incWaitTimes()
         cPQ.incTurnAroundTimes()
@@ -576,13 +576,12 @@ def PreemptivePriority(cPQ, n_CPU):
                         #print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
                     num_alive_CPUs -= 1
             count += 1
-            time+=1
-            dt+=1
             
+            #dt+=1
+        time+=1
         if not inuse or num_alive_CPUs == 0:
             break
-        time+=1
-        dt+=1
+        #dt+=1
 
 
 def RoundRobin(cPQ, n_CPU, timeslice=100):
