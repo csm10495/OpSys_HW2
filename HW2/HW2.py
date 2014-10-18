@@ -91,11 +91,12 @@ class Process:
 
     #increment priority by 1
     def incPriority(self):
-        self.priority+=1
-        if(self.cpu_bound):
-            print "Increased the priority of CPU - bound process ID", self.pid, "to", self.priority," due to aging"
-        else:
-            print "Increased the priority of CPU - bound process ID", self.pid, "to", self.priority," due to aging"
+        if self.priority > 0:
+            self.priority=-1
+            if(self.cpu_bound):
+                print "Increased the priority of CPU - bound process ID", self.pid, "to", self.priority," due to aging"
+            else:
+                print "Increased the priority of Interactive - bound process ID", self.pid, "to", self.priority," due to aging"
 
     #increments wait_time by 1
     def incrementWaitTime(self):
@@ -244,8 +245,19 @@ class cPQueue:
                 del self._WP[key]
             #otherwise update the wait time
             else:
-                self._WP[key] = value                
+                self._WP[key] = value
+       
+    #If wait time mod 1200 == 0 increase priority
+    def incPriorities(self):
+        for i in self._LQ:
+            if i.getWaitTime() % 1200 == 0:
+                i.incPriority()
+        t_cPQ = cPQueue(4)
+        for i in self._LQ:
+            t_cPQ.addItem(i)
         
+        self._LQ = t_cPQ._LQ  #ugly code...
+
 
 #A CPU class
 class CPU:
