@@ -482,7 +482,7 @@ def Preemptive(cPQ, n_CPU):
 def PreemptivePriority(cPQ, n_CPU):
     
     global time
-    dt = 0
+    dt = 0 #needed to update priority
     CPUs = getCPUList(n_CPU)
 
     #initial adding
@@ -529,7 +529,7 @@ def PreemptivePriority(cPQ, n_CPU):
             count += 1
             time+=1
             dt+=1
-        if(dt-1200)>=0:
+        if(dt-1200)>=0:#check to see if time to increase priority
             for p in cPQ:
                 p.incPriority()
             dt = 0
@@ -570,7 +570,7 @@ def PreemptivePriority(cPQ, n_CPU):
             break
         time+=1
         dt+=1
-    if(dt-1200)>=0:
+    if(dt-1200)>=0:#check to see if time to increase priority
         for p in cPQ:
             p.incPriority()
         dt = 0
