@@ -92,7 +92,7 @@ class Process:
     #increment priority by 1
     def incPriority(self):
         if self.priority > 0:
-            self.priority=-1
+            self.priority-=1
             if(self.cpu_bound):
                 print "Increased the priority of CPU - bound process ID", self.pid, "to", self.priority," due to aging"
             else:
@@ -116,8 +116,10 @@ class Process:
         global time
         if self.burst <= self.run_time:
             if self.cpu_bound:
+                print "[time",time,"ms] CPU bound process ID ", self.pid," CPU burst done (turnaround time ", self.turnaround_time,"Total wait time",self.wait_time,"ms)"
                 print "[time",time,"ms] CPU bound process ID ", self.pid," terminated (avg turnaround time ", self.turnaround_time,"Total wait time",self.wait_time,"ms)"
             else:
+                print "[time",time,"ms] Interactive process ID ", self.pid," CPU burst done (turnaround time ", self.turnaround_time,"Total wait time",self.wait_time,"ms)"
                 print "[time",time,"ms] Interactive process ID ", self.pid," terminated (avg turnaround time ", self.turnaround_time,"Total wait time",self.wait_time,"ms)"
         return self.burst <= self.run_time
 
@@ -251,7 +253,9 @@ class cPQueue:
     def incPriorities(self):
         for i in self._LQ:
             if i.getWaitTime() % 1200 == 0:
+                #print"Pid: ",i.getPID()," Priority: ",i.getPriority()
                 i.incPriority()
+                #print"Pid: ",i.getPID()," Priority: ",i.getPriority()
         t_cPQ = cPQueue(4)
         for i in self._LQ:
             t_cPQ.addItem(i)
@@ -541,11 +545,8 @@ def PreemptivePriority(cPQ, n_CPU):
             count += 1
             time+=1
             dt+=1
-        if(dt-1200)>=0:#check to see if time to increase priority
-            for p in cPQ:
-                p.incPriority()
-            dt = 0
         
+        cPQ.incPriorities()
         cPQ.incWaitTimes()
         cPQ.incTurnAroundTimes()
 
@@ -568,10 +569,10 @@ def PreemptivePriority(cPQ, n_CPU):
                     p = i[0].getRunningProcess()
                     time += 1
                     i[0].contextSwitch(cPQ.popTop())  #switches to None
-                    if p.cpu_bound:
-                        print "[time",time,"ms] CPU bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
-                    else:
-                        print "[time",time,"ms] Interactive bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
+                    #if p.cpu_bound:
+                    #    print "[time",time,"ms] CPU bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
+                    #else:
+                    #    print "[time",time,"ms] Interactive bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
                         #print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
                     num_alive_CPUs -= 1
             count += 1
@@ -582,10 +583,6 @@ def PreemptivePriority(cPQ, n_CPU):
             break
         time+=1
         dt+=1
-    if(dt-1200)>=0:#check to see if time to increase priority
-        for p in cPQ:
-            p.incPriority()
-        dt = 0
 
 
 def RoundRobin(cPQ, n_CPU, timeslice=100):
