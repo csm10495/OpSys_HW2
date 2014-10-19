@@ -174,7 +174,7 @@ class cPQueue:
             #P_SJF
             if self.sortNum == 2:
                 p = self._LQ[i]
-                if item.getBurst() - item.getBurst() < p.getBurst() - p.getRunTime():
+                if item.getBurst() - item.getRunTime() < p.getBurst() - p.getRunTime():
                     self._LQ.insert(i, item)
                     return True        
             #P_RR
@@ -427,12 +427,12 @@ def printContextSwitch(old_p, new_p):
        # print "WARNING: Why context switch from NA to NA?"
         return
     if not old_p:
-        print "[time",time,"ms] context switch(swapping out process ID", na,"for process ID", new_p.getPID(),")"
+        print "[time",time,"ms] context switch (swapping out process ID", na,"for process ID", new_p.getPID(),")"
     if not new_p:
-        print "[time",time,"ms] context switch(swapping out process ID", old_p.getPID(),"for process ID", na,")"
+        print "[time",time,"ms] context switch (swapping out process ID", old_p.getPID(),"for process ID", na,")"
 
     if new_p and old_p:
-        print "[time",time,"ms] context switch(swapping out process ID", old_p.getPID(),"for process ID", new_p.getPID(),")"
+        print "[time",time,"ms] context switch (swapping out process ID", old_p.getPID(),"for process ID", new_p.getPID(),")"
 
 #returns whether the list has a CPUBound Item or not
 def listHasCPUBoundItem(done_with_io):
@@ -476,6 +476,7 @@ def printFinalInfo(done_processes, n_CPU):
         print "Status are not available due to 0 time or 0 complete processes"
         return
 
+    print ""
     print "Turnaround time: min", min_turnaround, "ms; avg", total_turnaround / len(done_processes), "ms; max", max_turnaround, "ms"
     print "Total wait time: min", min_wait, "ms; avg", total_wait / len(done_processes), "ms; max", max_wait, "ms"
     print "Average CPU utilization:", str(float(total_turnaround) / float(time * n_CPU) * 100) + "%"
