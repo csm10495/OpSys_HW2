@@ -174,7 +174,7 @@ class cPQueue:
             #P_SJF
             if self.sortNum == 2:
                 p = self._LQ[i]
-                if item.getBurst() < p.getBurst() - p.getRunTime():
+                if item.getBurst() - item.getBurst() < p.getBurst() - p.getRunTime():
                     self._LQ.insert(i, item)
                     return True        
             #P_RR
