@@ -246,19 +246,6 @@ class cPQueue:
                 return True
         return False
 
-    #ugly code...
-    def incPriorities(self):
-        for i in self._LQ:
-            if i.getWaitTime() % 1200 == 0:
-                #print"Pid: ",i.getPID()," Priority: ",i.getPriority()
-                i.incPriority()
-                #print"Pid: ",i.getPID()," Priority: ",i.getPriority()
-        t_cPQ = cPQueue(4)
-        for i in self._LQ:
-            t_cPQ.addItem(i)
-        
-        self._LQ = t_cPQ._LQ  
-
     #decrements IO in
     def decIO(self):
         processes_with_0_io = []
@@ -272,6 +259,19 @@ class cPQueue:
         #we want these processes to get back onto cPQ
         return processes_with_0_io
 
+    #will check each process for a wait time mod 1200
+    #if true increase process priority
+    def possiblyIncPriorities(self):
+        for i in self._LQ:
+            if i.getWaitTime() % 1200 == 0:
+                #print"Pid: ",i.getPID()," Priority: ",i.getPriority()
+                i.incPriority()
+                #print"Pid: ",i.getPID()," Priority: ",i.getPriority()
+        t_cPQ = cPQueue(4)
+        for i in self._LQ:
+            t_cPQ.addItem(i)
+        
+        self._LQ = t_cPQ._LQ  
 
 #A CPU class
 class CPU:
@@ -327,7 +327,6 @@ class CPU:
     #returns the currently running process
     def getRunningProcess(self):
         return self.runningprocess
-
 
 #gets a list of processes of size n
 #~80% of them are interactive (20 - 200ms burst)
@@ -552,7 +551,7 @@ def Preemptive(cPQ, n_CPU):
 
         for current_CPU in CPUs:
             #Preemption!
-            if current_CPU.getRunningProcess() and cPQ.peekTop() and current_CPU.getRunningProcess().getRunTime() > cPQ.peekTop().getRunTime():
+            if current_CPU.getRunningProcess() and cPQ.peekTop() and current_CPU.getRunningProcess().getBurst() - current_CPU.getRunningProcess().getRunTime() > cPQ.peekTop().getBurst() - cPQ.peekTop().getRunTime():
                 tmp_p = current_CPU.getRunningProcess()
                 print "[time",time,"ms] Preemption (swapping out process ID", tmp_p.getPID(),"for process ID", cPQ.peekTop().getPID(),")"
                 time += 1
@@ -679,94 +678,81 @@ def RoundRobin(cPQ, n_CPU, timeslice=100):
 
     printFinalInfo(done_processes, n_CPU)
 
+#cPQ is a cPriorityQueue
+#n_CPU is the number of CPUs
+#Preemptive Priority 
 def PreemptivePriority(cPQ, n_CPU):
-    
     global time
-    #dt = 0 #needed to update priority
     CPUs = getCPUList(n_CPU)
+    IOQ = cPQueue(5) #Priority Queue based on IO
+    done_with_io = [] #list of processes ready to be readded to cPQ
+    done_processes = [] #list of completed processes
 
-    #initial adding
-    for i in CPUs:
-        if cPQ.isEmpty():
-            break
-        i[0].contextSwitch(cPQ.popTop())
-        i[0].incrementTimes()
-    time += 1
+    while IOQ.hasACPUBoundItem() or cPQ.hasACPUBoundItem() or aCPUIsBusyWithACPUBoundProcess(CPUs) or listHasCPUBoundItem(done_with_io):
+        time += 1
 
-    cPQ.incWaitTimes()
-    cPQ.incTurnAroundTimes()
+        #will update priorities of in cPQ if needed
+        cPQ.possiblyIncPriorities()
 
+        #readd items that are done with io to cPQ
+        for i in done_with_io:
+            cPQ.addItem(i)
+            if(i.isCPUBound()):#print that an item has been added
+                print "CPU-bound process",i.getPID(),"entered the ready queue (requires",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
+            else:
+                print "Interactive process",i.getPID(),"entered the ready queue (requires",i.getBurst(),"ms CPU time; priority", i.getPriority(),")"
 
-    while not cPQ.isEmpty():
-        count = 1
-        for i in CPUs:
-            if not cPQ.isEmpty():
-                cPQ.addItem(i[0].getRunningProcess())  #add current CPU process back to cPQ to see if it should be preempted
-                if (cPQ.peekTop().getPID() != i[0].getRunningProcess().getPID()):
-                    #PREEMPTION
-                    p = i[0].getRunningProcess()
+        for current_CPU in CPUs:
+            #Preemption!
+            if current_CPU.getRunningProcess() and cPQ.peekTop() and current_CPU.getRunningProcess().getPriority() > cPQ.peekTop().getPriority():
+                tmp_p = current_CPU.getRunningProcess()
+                print "[time",time,"ms] Preemption (swapping out process ID", tmp_p.getPID(),"for process ID", cPQ.peekTop().getPID(),")"
+                time += 1
+                current_CPU.contextSwitch(cPQ.popTop())
+                time += 1
+                cPQ.addItem(tmp_p)
+
+            #increment times for this CPU if it is in use
+            if current_CPU.isInUse():
+                current_CPU.incrementTimes()
+
+            #if there is no process in the CPU try to give it one
+            if not current_CPU.getRunningProcess():
+                if cPQ.peekTop():
+                    current_CPU.contextSwitch(cPQ.popTop())
                     time += 1
-                    #dt+=1
-                    i[0].contextSwitch(cPQ.popTop())  #CONTEXT SWITCH BECAUSE OF PREEMPTION
+                    continue
+
+            #if the current CPU is done, perform a context switch to the next available process
+            if current_CPU.isDone():
+                #print turnaround/burst completion
+                if current_CPU.getRunningProcess():
+                    
+                    #add to done list
+                    done_processes.append(current_CPU.getRunningProcess())
+
+                    current_CPU.getRunningProcess().printDone()
+                    if current_CPU.getRunningProcess().isInteractive():
+                        IOQ.addItem(getIOBoundProcess(current_CPU.getRunningProcess().getPID()))
+                    else:
+                        #print "CPUBound Process is being added to IOQ with a B of", current_CPU.getRunningProcess().getB() - 1
+                        #if current_CPU.getRunningProcess().getB() - 1 == 0:
+                        #    pass
+                        IOQ.addItem(getCPUBoundProcess(current_CPU.getRunningProcess().getB() - 1, current_CPU.getRunningProcess().getPID()))
+
+                time += 1 
+                current_CPU.contextSwitch(cPQ.popTop())
+                if not cPQ.isEmpty():
                     time += 1
-                    #dt+=1
-                    print "[time",time,"ms] context switch(swapping out process ID ", p.getPID()," for process ID", i[0].getRunningProcess().getPID(),")"
-                else:
-                    cPQ.popTop()
 
-            if i[0].getRunningProcess().isDone() and not cPQ.isEmpty():
-                p = i[0].getRunningProcess()
-                time+=1
-                #dt+=1
-                i[0].contextSwitch(cPQ.popTop())  #CONTEXT SWITCH BECAUSE OF BURST COMPLETION
-                time+=1
-                #dt+=1
-                print "[time",time,"ms] context switch(swapping out process ID ", p.getPID()," for process ID", i[0].getRunningProcess().getPID(),")"
 
-            if not i[0].getRunningProcess().isDone():  #if the current process on CPU i[0] is not done
-                i[0].incrementTimes()
-
-            count += 1
-            #dt+=1
-
-        time+=1
-        cPQ.incPriorities()
+        #increment wait times
         cPQ.incWaitTimes()
-        cPQ.incTurnAroundTimes()
 
-    #gets number of currently alive CPUs
-    num_alive_CPUs = 0
-    for i in CPUs:
-        if i[0].isInUse():
-            num_alive_CPUs += 1
+        #decrement IO times
+        done_with_io = IOQ.decIO()
 
-    #Clear out processes already in CPUs
-    while True:
-        inuse = False
-        count = 1
-        for i in CPUs:
-            if i[0].isInUse():
-                inuse = True
-                i[0].incrementTimes()
-
-                if i[0].getRunningProcess().isDone():
-                    p = i[0].getRunningProcess()
-                    time += 1
-                    i[0].contextSwitch(cPQ.popTop())  #switches to None
-                    #if p.cpu_bound:
-                    #    print "[time",time,"ms] CPU bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
-                    #else:
-                    #    print "[time",time,"ms] Interactive bound process ID ", p.getPID()," CPU burst done (turnaround time ", p.getTurnaroundTime(),"Total wait time",p.getWaitTime(),"ms)"
-                        #print "PID:", p.getPID(), "Completed on CPU", count, " Burst:", p.getBurst(), " RunTime:", p.getRunTime(), " Only took:", p.getTurnaroundTime(), " WaitTime:", p.getWaitTime()
-                    num_alive_CPUs -= 1
-            count += 1
-            
-            #dt+=1
-        time+=1
-        if not inuse or num_alive_CPUs == 0:
-            break
-        #dt+=1
-
+    printFinalInfo(done_processes, n_CPU)
 
 
 

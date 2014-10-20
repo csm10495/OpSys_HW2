@@ -13,7 +13,7 @@
     <Name>HW2</Name>
     <RootNamespace>HW2</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>3 12 4</CommandLineArguments>
+    <CommandLineArguments>2 12 4</CommandLineArguments>
     <InterpreterPath />
     <InterpreterArguments />
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
